@@ -1,21 +1,51 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws FileNotFoundException {
-        File schedules = new File("Schedules.txt");
-        Scanner scan = new Scanner(schedules);
+        File schedules = new File("Schedules.txt"); //importing file
+        Scanner scan = new Scanner(schedules); //adds scanner for said file
 
-        for (int i = 0; i < schedules.length(); i += 9) {
-            
+        int index = 0; //index for what line we're on in the file
+        boolean[][] schedule = new boolean[8][60]; //creates an array for the schedule (lines that are not divisible by 9)
+        int count = 0; //count for the number of reservations fulfilled
+
+        while (scan.hasNextLine()) { //while the file has next line
+            index++; //updates line num
+            String line = scan.nextLine(); //stores entire line
+            Scanner lineScanner = new Scanner(line); //scanner for just this one line
+
+            if (index % 9 == 0) { //every 9th line
+                AppointmentBook appointmentBook = new AppointmentBook(schedule); //appointmentbook var for the schedule (which should be done by here since it should've ran 8 times before)
+                int[] nums = new int[3]; //list for the nums
+                int begin = 0; //initializes the variables based off assignment details
+                int end = 0;
+                int duration = 0;
+                for (int i = 0; i < 3 && lineScanner.hasNextInt(); i++) { //checks each int on the int line
+                    nums[i] = lineScanner.nextInt(); //sets nums list to the line
+                }
+                begin = nums[0]; //assigns the details based off of num positions
+                end = nums[1];
+                duration = nums[2];
+
+                for (int i = begin; i < end; i++){ //checks for each hour (inclusive) between the begin and end hour for the free block
+                    if (appointmentBook.findFreeBlock(i,duration) != -1) { // if the free block exists
+                        count++; //fulfills the reservation and increases the count
+                    }
+                }
+            } else { //every not 9th line
+                for (int period = 0; period < 8; period++){ //for every line (periods)
+                    for (int minute = 0; minute < 60 && lineScanner.hasNextBoolean(); minute++){ // for every boolean in the line (minute of period)
+                        schedule[period][minute] = lineScanner.nextBoolean(); //sets up the schedule for the reservation checking
+                    }
+                }
+            }
         }
-
-//        boolean[][] schedule = new boolean[8][60]; //creating a 2D boolean array with 8 rows (0..8 periods) & 60 columns (0...59 minutes) to make the period 2 table
-//        AppointmentBook a = new AppointmentBook(schedule); //initialize an appointmentbook object and pass the schedule (array) into it
-
+        System.out.println(count); //shows final fulfilled reservations
     }
-
+}
 
 //test case 1
 //
@@ -29,7 +59,7 @@ public class Main {
 //        System.out.println(a.findFreeBlock(2,20)); //would return -1, since no 20-minute block of available minutes exists in period 2.
 //        AppointmentBook b = new AppointmentBook(schedule);
 //
-////test case 2
+//test case 2
 //        for (int i = 25; i < 30; i++) schedule [1][i] = true;
 //        for (int i = 0; i < 15; i++) schedule [2][i] = true;
 //        for (int i = 41; i < 60; i++) schedule [2][i] = true;
@@ -49,6 +79,6 @@ public class Main {
 //        b.printPeriod(3);
 //
 //        System.out.println(b. makeAppointment(2, 4, 30));
-    }
-
-}
+//    }
+//
+//}
